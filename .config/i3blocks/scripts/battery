@@ -1,0 +1,41 @@
+#!/bin/bash
+
+AWK_CODE='BEGIN {
+    FS="=";
+    status="";
+    capacity=0;
+}
+{
+    if ($0 ~ /STATUS/) {
+        status=$2;
+    }
+    else if ($0 ~ /CAPACITY=/ ) {
+        capacity=$2;
+    }
+}
+END {
+    print status " " capacity;
+}
+'
+
+if ! [ -d "${BATTERY_DIR}" ]; then
+    echo "No battery"
+    echo "No bat"
+    exit 33 
+fi
+
+RESULT=$(cat "${BATTERY_DIR}/uevent" | awk "$AWK_CODE")
+STATUS=$(echo "${RESULT}" | awk '{print $1}')
+CAPACITY=$(echo "${RESULT}" | awk '{print $2}')
+
+if [ "${STATUS}" = "Discharging" ]; then
+    I3B_COLOR="${I3B_COLOR_DEGRADED}"
+    if [ ${CAPACITY} -le ${THRESHOLD} ]; then
+        I3B_COLOR="${I3B_COLOR_BAD}"
+        notify-send --urgency=critical "ACHTUNG!" "Battery level is critically low!"
+    fi
+fi
+
+echo "${CAPACITY}%"
+echo "${CAPACITY}%"
+echo "${I3B_COLOR}"

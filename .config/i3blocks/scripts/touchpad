@@ -1,0 +1,33 @@
+#!/bin/bash
+
+AWK_CODE='BEGIN {
+    id="";
+}
+{
+    if ( $0 ~ /TouchPad/ ) {
+        for( i = 1; i <= NF; i++ ) {
+            if ( (x = index( $i, "id=" )) > 0 ) {
+                id = substr( $i, x+3, length($i)-x-2 );
+            }
+        }
+    }
+}
+END {
+    print id;
+}
+'
+
+echo "🗖 "
+echo "🗖 "
+
+ID=$(xinput list | awk "$AWK_CODE")
+DISABLED=$(xinput --list --long | grep -A 1 "id=${ID}" | grep -o "disabled")
+
+if [ -n "${DISABLED}" ]; then
+    xinput enable "${ID}"
+    notify-send -u low "Erfolg!" "Touchpad enabled."
+else
+    xinput disable "${ID}"
+    notify-send -u normal "Beachten." "Touchpad disabled."
+    echo "${I3B_COLOR_BAD}"
+fi

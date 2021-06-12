@@ -1,0 +1,12 @@
+#!/bin/bash
+
+LAYOUT=$(xkblayout-state print "%s")
+
+CAPS_STATUS=$(xset q | grep Caps | awk -F: '{print $3}' | awk '{print $1}')
+
+echo "${LAYOUT}"
+echo "${LAYOUT}"
+
+if [ "${CAPS_STATUS}" = "on" ]; then
+    echo "${I3B_COLOR_BAD}"
+fi

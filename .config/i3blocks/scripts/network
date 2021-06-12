@@ -1,0 +1,110 @@
+#!/bin/bash
+
+# check if the interface is up
+OPERSTATE=$(cat /sys/class/net/${INTERFACE}/operstate)
+
+if [ "${OPERSTATE}" = "down" ]; then
+    echo "Down"
+    echo "Down"
+    exit          # automatically prints text in red
+fi
+
+STATUS=$(nmcli device status | awk -v dev=${INTERFACE} '{if ($1 == dev) { print $3 } }')
+
+if ! [ "${STATUS}" == "connected" ]; then
+    echo "${STATUS}"
+    echo "${STATUS}"
+    exit          # automatically prints text in red
+fi
+
+AWK_CODE='BEGIN {
+    quality="";
+}
+{
+    if( $0 ~ /Link Quality/ ) {
+        if( (x=index($2,"=")) > 0 ) {
+            quality = substr($2, x+1, length($2)-x);
+        }
+    }
+}
+END {
+    print quality; 
+}
+'
+
+QUALITY_STR=$(iwconfig ${INTERFACE} | awk "${AWK_CODE}")
+QUALITY=
+
+if [ -n "${QUALITY_STR}" ]; then
+    QUALITY=$(echo "100 * ${QUALITY_STR}" | bc)
+    if [ -n "${THRESHOLD}" ] && [ ${QUALITY} -le ${THRESHOLD} ]; then
+        I3B_COLOR="${I3B_COLOR_DEGRADED}"
+    fi
+    QUALITY=""
+fi
+
+
+# The basic idea of implementation of calculating RX/TX speed is taken from
+# i3blocks-contrib project : https://github.com/vivien/i3blocks-contrib/blob/master/bandwidth/bandwidth
+# NOTE : the minor changes were made
+# The original idea belongs to :
+#   Copyright (C) 2012 Stefan Breunig <stefan+measure-net-speed@mathphys.fsk.uni-heidelberg.de>
+#   Copyright (C) 2014 kaueraal
+#   Copyright (C) 2015 Thiago Perrotta <perrotta dot thiago at poli dot ufrj dot br>
+
+# path to store the old results in
+OLD_DATA_FILE="/dev/shm/$(basename $0)-${INTERFACE}"
+
+# grabbing data for each adapter.
+read RX < "/sys/class/net/${INTERFACE}/statistics/rx_bytes"
+read TX < "/sys/class/net/${INTERFACE}/statistics/tx_bytes"
+
+# get time
+OLD_TIME=$(date +%s)
+
+# write current data if file does not exist. Do not exit, this will cause
+# problems if this file is sourced instead of executed as another process.
+if ! [[ -f "${OLD_DATA_FILE}" ]]; then
+  echo "${OLD_TIME} ${RX} ${TX}" > "${OLD_DATA_FILE}"
+  chmod 0666 "${OLD_DATA_FILE}"
+fi
+
+# read previous state and update data storage
+read OLD_DATA < "${OLD_DATA_FILE}"
+echo "${OLD_TIME} ${RX} ${TX}" > "${OLD_DATA_FILE}"
+
+# parse old data and calc time passed
+OLD_DATA=(${OLD_DATA//;/ })
+TIME_DIFF=$(( ${OLD_TIME} - ${OLD_DATA[0]} ))
+
+# sanity check: has a positive amount of time passed
+[[ "${TIME_DIFF}" -gt 0 ]] || exit
+
+# calc bytes transferred, and their rate in byte/s
+RX_DIFF=$(( ${RX} - ${OLD_DATA[1]} ))
+TX_DIFF=$(( ${TX} - ${OLD_DATA[2]} ))
+RX_RATE=$(( ${RX_DIFF} / ${TIME_DIFF} ))
+TX_RATE=$(( ${TX_DIFF} / ${TIME_DIFF} ))
+
+# shift by 10 bytes to get KiB/s. If the value is larger than
+# 1024^2 = 1048576, then display MiB/s instead
+
+# incoming
+RX_KIB=$(( ${RX_RATE} >> 10 ))
+if hash bc 2>/dev/null && [[ "${RX_RATE}" -gt 1048576 ]]; then
+    RX_KIB=$(printf '%s M/s' $(echo "scale=1; ${RX_KIB} / 1024" | bc))
+else
+    RX_KIB="${RX_KIB} K/s"
+fi
+
+# outgoing
+TX_KIB=$(( ${TX_RATE} >> 10 ))
+if hash bc 2>/dev/null && [[ "${TX_RATE}" -gt 1048576 ]]; then
+    TX_KIB=$(printf '%s M/s' $(echo "scale=1; ${TX_KIB} / 1024" | bc))
+else
+    TX_KIB="${TX_KIB} K/s"
+fi
+
+echo "${QUALITY}${RX_KIB}|${TX_KIB}"
+echo "${QUALITY}${RX_KIB}|${TX_KIB}"
+echo "${I3B_COLOR}"

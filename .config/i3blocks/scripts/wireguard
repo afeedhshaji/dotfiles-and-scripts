@@ -1,0 +1,11 @@
+#/bin/bash
+
+VPN=$(nmcli -t connection show --active | grep wireguard | cut -d":" -f4)
+
+
+if [ ! -z $VPN ]
+then
+	echo "$VPN"
+else
+	echo "off"
+fi

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+DISK_TEMP="$(sudo smartctl -a /dev/sda | awk '/Temperature/ {print $10}')"
+
+if [ ${DISK_TEMP} -ge ${THRESHOLD} ]; then
+    I3B_COLOR="${I3B_COLOR_BAD}"
+    notify-send -u critical "ACHTUNG!" "SSD is overheating!"
+fi
+
+echo "${DISK_TEMP}°C" # full_text
+echo "${DISK_TEMP}°C" # short_text
+#echo "${I3B_COLOR}"   # color

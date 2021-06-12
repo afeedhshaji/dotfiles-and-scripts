@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DISK_AVAIL="$(df -h $1 | awk '{if ( NR == 2 ) print $4}')"
+
+echo "${DISK_AVAIL}" # full_text
+echo "${DISK_AVAIL}" # short_text
+#echo "${I3B_COLOR}"  # color

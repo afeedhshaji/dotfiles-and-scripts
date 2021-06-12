@@ -1,0 +1,8 @@
+#!/bin/bash
+
+CPU_LOAD="$(cat /proc/loadavg | awk '{print $2}')"  #cpu load over the last 5 minutes
+
+
+echo "${CPU_LOAD}"    #full_text
+echo "${CPU_LOAD}"    #short_text
+#echo "${I3B_COLOR}"   #color

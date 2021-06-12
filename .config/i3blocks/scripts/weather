@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ -z "${LOCATION}" ]; then
+    echo "No location"
+    echo "No location"
+    exit 33
+fi
+
+RESULT=$(curl --silent wttr.in/${LOCATION}?format="%c+%t+%h+%w+%m")
+
+if [ "$?" != "0" ]; then
+    echo "No data"
+    echo "No data"
+    exit 33
+else
+    echo "${RESULT}"
+    echo "${RESULT}"
+fi

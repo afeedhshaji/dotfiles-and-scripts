@@ -1,0 +1,8 @@
+#!/bin/bash
+
+CPU_TEMP="$(cat /sys/class/thermal/thermal_zone0/temp | awk '{print $1/1000}')"
+
+
+echo "${CPU_TEMP}°C" #full_text
+echo "${CPU_TEMP}°C" #short_text
+#echo "${I3B_COLOR}"  #color

@@ -1,0 +1,103 @@
+command=$HOME/.config/i3blocks/scripts/$BLOCK_NAME
+separator_block_width=15
+markup=none
+
+# Below the properties/variables written in CAPS
+# are user-defined and are supposed to be changed
+
+# COLORS (dracula.vim as a base, accessible inside scripts)
+I3B_COLOR_GOOD=#50FA7B      # green
+I3B_COLOR_DEGRADED=#f1fa8c  # yellow
+I3B_COLOR_BAD=#ff5555       # red
+I3B_COLOR=#50FA7B           # default "colored" color (green)
+
+# WEATHER
+[weather]
+interval=300
+LOCATION="Trivandrum"
+
+# VOLUME
+#[volume]
+#label=♪:
+#interval=1
+#signal=10
+#separator=true
+
+#if you prefer automatic updating
+[volume_pa]
+#command=$SCRIPT_DIR/volume-pulseaudio
+interval=persist
+SUBSCRIBE=1
+USE_ALSA_NAME=1
+#
+#
+##if you prefer updating only when signaled
+#[volume-pulseaudio]
+#command=$SCRIPT_DIR/volume-pulseaudio
+#interval=once
+#signal=1
+#USE_ALSA_NAME=1
+
+# DISK
+# 1.Available space
+# 1.1 root dir
+[disk /]
+label=🐧 
+interval=30
+# 1.2 home dir
+#[disk /home]
+#label=⌂:
+#interval=30
+## 2. Temperature
+#[disk_temp]
+#label=🌡💾:
+#interval=10
+#THRESHOLD=60
+
+# CPU
+# 1.1 Temperature
+[cpu_temp]
+label=🌡
+interval=10
+THRESHOLD=80
+# 1.2 Load
+[cpu_load]
+label=⚛ 
+interval=10
+THRESHOLD=2.8
+
+# NETWORK
+# 1.1 Wi-Fi
+[network]
+label=📡 (wlo1) 
+interval=2
+INTERFACE=wlo1
+
+# 1.2 ethernet
+[network]
+label=🖧 (eno1) 
+interval=2
+INTERFACE=eno1
+
+[ip_address]
+label=IP:
+interval=5
+
+[surfshark]
+label=🛡️ (VPN) 
+interval=5
+
+# BATTERY 
+[battery]
+label=🔋
+interval=10
+BATTERY_DIR=/sys/class/power_supply/BAT0
+THRESHOLD=10
+
+# DATE TIME
+[time]
+label=🕐 
+command=date '+%a %d | %H:%M'
+interval=5
+
+
